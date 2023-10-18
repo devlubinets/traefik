@@ -15,8 +15,7 @@ services:
     restart: unless-stopped
     volumes:
       - portal_traefik_edu:/acme
-      - /var/run/docker.sock:/var/run/docker.sock
-#      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
 
   php-traefik-edu:
     working_dir: /usr/share/nginx
