@@ -1,33 +1,33 @@
 version: "3.8"
 
 services:
-  traefik-edu:
-    container_name: portal-traefik
+  portal-traefik-edu:
+    container_name: portal-traefik-edu
     command:
+      - --api.dashboard=true
       - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
     image: traefik:latest
     networks:
-      api_driven:
+      api_driven_traefik_edu:
     restart: unless-stopped
     volumes:
-      - portal_intranet:/acme
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+      - portal_traefik_edu:/acme
+      - /var/run/docker.sock:/var/run/docker.sock
+#      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
 
   php-traefik-edu:
     working_dir: /usr/share/nginx
     env_file:
       - .env
-    container_name: php-i4f
-    depends_on:
-      - traefik-edu
+    container_name: php-traefik-edu
     build:
       context: .
       dockerfile: ./php/Dockerfile
     networks:
-      api_driven:
+      api_driven_traefik_edu:
     restart: unless-stopped
     volumes:
       - ../docker.sites/api-portal:/usr/share/nginx/api-portal
@@ -40,17 +40,17 @@ services:
     working_dir: /usr/share/nginx/api-local
     env_file:
       - .env
-    container_name: api-i4f
+    container_name: api-traefik-edu
     depends_on:
       - php-traefik-edu
-      - traefik-edu
+      - portal-traefik-edu
     image: nginx:stable-alpine
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.rule=Host(`api-i4f`)
       - traefik.http.routers.api.entrypoints=web
     networks:
-      api_driven:
+      api_driven_traefik_edu:
     restart: unless-stopped
     volumes:
       - ../docker.sites/api-portal:/usr/share/nginx/api-portal
@@ -58,8 +58,8 @@ services:
     command: [ nginx, '-g', 'daemon off;' ]
 
 networks:
-  api_driven:
-    name: "api_driven"
+  api_driven_traefik_edu:
+    name: "api_driven_traefik_edu"
 
 volumes:
-  portal_intranet:
+  portal_traefik_edu:
